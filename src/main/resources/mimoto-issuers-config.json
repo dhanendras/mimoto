@@ -110,7 +110,7 @@
       "additional_headers": {
         "Accept": "application/json"
       },
-      ".well-known": "http://20.193.138.163/.well-known/openid-credential-issuer?version=v11",
+      ".well-known": "http://20.193.138.163/v1/esignet/vci/.well-known/openid-credential-issuer?version=v11",
       "redirect_uri": "http://20.193.138.163/redirect",
       "authorization_endpoint": "http://20.193.138.163/authorize",
       "authorization_audience": "http://20.193.138.163/v1/esignet/oauth/v2/token",
