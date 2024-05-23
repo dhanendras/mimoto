@@ -66,11 +66,11 @@
         }
       ],
       "client_id": "DPG",
-      "redirect_uri": "http://20.193.138.163/redirect",
+      "redirect_uri": "io.mosip.residentapp://oauth",
       "scopes_supported": [
         "sunbird_rc_insurance_vc_ldp"
       ],
-      "authorization_endpoint": "http://20.198.16.215/authorize/ui",
+      "authorization_endpoint": "http://20.198.16.215/ui/authorize",
       "authorization_audience": "http://20.198.16.215/v1/esignet/oauth/v2/token",
       "token_endpoint": "http://20.193.138.163:8089/residentmobileapp/get-token/Veridonia",
       "proxy_token_endpoint": "http://20.198.16.215/v1/esignet/oauth/v2/token",
@@ -111,8 +111,8 @@
         "Accept": "application/json"
       },
       ".well-known": "http://20.193.138.163/v1/esignet/vci/.well-known/openid-credential-issuer?version=v11",
-      "redirect_uri": "http://20.193.138.163/redirect",
-      "authorization_endpoint": "http://20.193.138.163/authorize",
+      "redirect_uri": "io.mosip.residentapp://oauth",
+      "authorization_endpoint": "http://20.193.138.163/ui/authorize",
       "authorization_audience": "http://20.193.138.163/v1/esignet/oauth/v2/token",
       "token_endpoint": "http://20.193.138.163:8089/residentmobileapp/get-token/Sunbird",
       "proxy_token_endpoint": "http://20.193.138.163/v1/esignet/oauth/v2/token",
