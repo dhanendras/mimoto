@@ -75,7 +75,7 @@ public class RestApiClient {
     @Value("${mosip.iam.adapter.appid}")
     private String appId;
 
-    @Value("${mosip.iam.adapter.disable-self-token-rest-template:false}")
+    @Value("${mosip.iam.adapter.disable-self-token-rest-template:true}")
     private boolean disableSelfTokenRestTemplate;
 
     @Autowired
@@ -157,15 +157,17 @@ public class RestApiClient {
         return result;
     }
 
-    public <T> T postApi(String uri, MediaType mediaType, Object requestType, Class<?> responseClass, boolean useBearerToken) throws Exception {
+    public <T> T postApi(String uri, MediaType mediaType, Object requestType, Class<?> responseClass,
+            boolean useBearerToken) throws Exception {
         T result = null;
         try {
             logger.info("RestApiClient::postApi()::entry uri: {}", uri);
-            result = (T) plainRestTemplate.postForObject(uri, setRequestHeader(requestType, mediaType, useBearerToken), responseClass);
+            result = (T) plainRestTemplate.postForObject(uri, setRequestHeader(requestType, mediaType, useBearerToken),
+                    responseClass);
         } catch (Exception e) {
             logger.error("RestApiClient::postApi()::error uri: {} {} {}", uri, e.getMessage(), e);
             if (e instanceof HttpClientErrorException) {
-                HttpClientErrorException ex = (HttpClientErrorException)e;
+                HttpClientErrorException ex = (HttpClientErrorException) e;
                 if (ex.getStatusCode().value() == 401) {
                     // bearer token renew logic. Set token as empty so that it will auto-renew
                     System.setProperty(TOKEN, "");
@@ -178,23 +180,25 @@ public class RestApiClient {
         return result;
     }
 
-    public <T> T postApi(String uri, MediaType mediaType, Object requestType, Class<?> responseClass, String bearerToken){
+    public <T> T postApi(String uri, MediaType mediaType, Object requestType, Class<?> responseClass,
+            String bearerToken) {
         T result = null;
         try {
             logger.info("RestApiClient::postApi()::entry uri: {}", uri);
-            result = (T) plainRestTemplate.postForObject(uri, setRequestHeader(requestType, mediaType, bearerToken), responseClass);
+            result = (T) plainRestTemplate.postForObject(uri, setRequestHeader(requestType, mediaType, bearerToken),
+                    responseClass);
         } catch (Exception e) {
             logger.error("RestApiClient::postApi()::error uri: {} {} {}", uri, e.getMessage(), e);
         }
         return result;
     }
 
-    private HttpEntity<Object> setRequestHeader(Object requestType, MediaType mediaType, String bearerToken){
+    private HttpEntity<Object> setRequestHeader(Object requestType, MediaType mediaType, String bearerToken) {
         MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
         if (mediaType != null) {
             headers.add(CONTENT_TYPE, mediaType.toString());
         }
-        headers.add("Authorization", "Bearer "+bearerToken);
+        headers.add("Authorization", "Bearer " + bearerToken);
         if (requestType != null) {
             try {
                 HttpEntity<Object> httpEntity = (HttpEntity<Object>) requestType;
@@ -227,7 +231,8 @@ public class RestApiClient {
      * @throws IOException
      */
     @SuppressWarnings("unchecked")
-    private HttpEntity<Object> setRequestHeader(Object requestType, MediaType mediaType, boolean useBearerToken) throws IOException {
+    private HttpEntity<Object> setRequestHeader(Object requestType, MediaType mediaType, boolean useBearerToken)
+            throws IOException {
         MultiValueMap<String, String> headers = new LinkedMultiValueMap<String, String>();
         if (mediaType != null) {
             headers.add(CONTENT_TYPE, mediaType.toString());
