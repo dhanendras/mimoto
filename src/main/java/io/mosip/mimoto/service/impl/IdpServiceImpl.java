@@ -35,18 +35,20 @@ public class IdpServiceImpl implements IdpService {
     JoseUtil joseUtil;
 
     @Override
-    public HttpEntity<MultiValueMap<String, String>> constructGetTokenRequest(Map<String, String> params, IssuerDTO issuerDTO) throws IOException, IssuerOnboardingException {
+    public HttpEntity<MultiValueMap<String, String>> constructGetTokenRequest(Map<String, String> params,
+            IssuerDTO issuerDTO) throws IOException, IssuerOnboardingException {
         HttpHeaders headers = new HttpHeaders();
-        MultiValueMap<String, String> map= new LinkedMultiValueMap<>();
+        MultiValueMap<String, String> map = new LinkedMultiValueMap<>();
 
         headers.setContentType(MediaType.APPLICATION_FORM_URLENCODED);
-        String clientAssertion = joseUtil.getJWT(issuerDTO.getClient_id(), keyStorePath, fileName, issuerDTO.getClient_alias(), cyptoPassword, issuerDTO.getAuthorization_audience());
+        String clientAssertion = joseUtil.getJWT(issuerDTO.getClient_id(), keyStorePath, fileName,
+                issuerDTO.getClient_alias(), cyptoPassword, issuerDTO.getAuthorization_audience());
 
         map.add("code", params.get("code"));
         map.add("client_id", issuerDTO.getClient_id());
         map.add("grant_type", params.get("grant_type"));
         map.add("redirect_uri", params.get("redirect_uri"));
-        map.add("client_assertion", clientAssertion.replace("[","").replace("]",""));
+        map.add("client_assertion", clientAssertion.replace("[", "").replace("]", ""));
         map.add("client_assertion_type", clientAssertionType);
         map.add("code_verifier", params.get("code_verifier"));
 
@@ -54,7 +56,7 @@ public class IdpServiceImpl implements IdpService {
     }
 
     @Override
-    public String getTokenEndpoint(IssuerDTO issuerDTO){
+    public String getTokenEndpoint(IssuerDTO issuerDTO) {
         return issuerDTO.getProxy_token_endpoint();
     }
 }

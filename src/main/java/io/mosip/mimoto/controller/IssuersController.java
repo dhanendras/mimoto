@@ -56,7 +56,8 @@ public class IssuersController {
             responseWrapper.setResponse(issuersService.getAllIssuers(search));
         } catch (ApiNotAccessibleException | IOException e) {
             logger.error("Exception occurred while fetching issuers ", e);
-            responseWrapper.setErrors(List.of(new ErrorDTO(API_NOT_ACCESSIBLE_EXCEPTION.getCode(), API_NOT_ACCESSIBLE_EXCEPTION.getMessage())));
+            responseWrapper.setErrors(List.of(
+                    new ErrorDTO(API_NOT_ACCESSIBLE_EXCEPTION.getCode(), API_NOT_ACCESSIBLE_EXCEPTION.getMessage())));
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseWrapper);
         }
 
@@ -73,7 +74,7 @@ public class IssuersController {
         IssuerDTO issuerConfig;
         try {
             issuerConfig = issuersService.getIssuerConfig(issuerId);
-        } catch (Exception exception ) {
+        } catch (Exception exception) {
             logger.error("Exception occurred while fetching issuers ", exception);
             responseWrapper = handleExceptionWithErrorCode(exception);
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseWrapper);
@@ -83,7 +84,8 @@ public class IssuersController {
 
         if (issuerConfig == null) {
             logger.error("invalid issuer id passed - {}", issuerId);
-            responseWrapper.setErrors(List.of(new ErrorDTO(INVALID_ISSUER_ID_EXCEPTION.getCode(), INVALID_ISSUER_ID_EXCEPTION.getMessage())));
+            responseWrapper.setErrors(List
+                    .of(new ErrorDTO(INVALID_ISSUER_ID_EXCEPTION.getCode(), INVALID_ISSUER_ID_EXCEPTION.getMessage())));
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(responseWrapper);
         }
 
@@ -92,7 +94,7 @@ public class IssuersController {
 
     @GetMapping("/{issuer-id}/credentialTypes")
     public ResponseEntity<Object> getCredentialTypes(@PathVariable("issuer-id") String issuerId,
-                                                                   @RequestParam(required = false) String search) {
+            @RequestParam(required = false) String search) {
         ResponseWrapper<Object> responseWrapper = new ResponseWrapper<>();
         responseWrapper.setId(ID);
         responseWrapper.setVersion("v1");
@@ -100,16 +102,18 @@ public class IssuersController {
         IssuerSupportedCredentialsResponse credentialTypes;
         try {
             credentialTypes = issuersService.getCredentialsSupported(issuerId, search);
-        }catch (ApiNotAccessibleException | IOException exception){
+        } catch (ApiNotAccessibleException | IOException exception) {
             logger.error("Exception occurred while fetching credential types", exception);
-            responseWrapper.setErrors(List.of(new ErrorDTO(API_NOT_ACCESSIBLE_EXCEPTION.getCode(), API_NOT_ACCESSIBLE_EXCEPTION.getMessage())));
+            responseWrapper.setErrors(List.of(
+                    new ErrorDTO(API_NOT_ACCESSIBLE_EXCEPTION.getCode(), API_NOT_ACCESSIBLE_EXCEPTION.getMessage())));
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseWrapper);
         }
         responseWrapper.setResponse(credentialTypes);
 
         if (credentialTypes.getSupportedCredentials() == null) {
             logger.error("invalid issuer id passed - {}", issuerId);
-            responseWrapper.setErrors(List.of(new ErrorDTO(INVALID_ISSUER_ID_EXCEPTION.getCode(), INVALID_ISSUER_ID_EXCEPTION.getMessage())));
+            responseWrapper.setErrors(List
+                    .of(new ErrorDTO(INVALID_ISSUER_ID_EXCEPTION.getCode(), INVALID_ISSUER_ID_EXCEPTION.getMessage())));
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(responseWrapper);
         }
 
@@ -118,46 +122,64 @@ public class IssuersController {
 
     @GetMapping("/{issuer-id}/credentials/{credentialType}/download")
     public ResponseEntity<?> generatePdfForVC(@RequestHeader("Bearer") String token,
-                                                         @PathVariable("issuer-id") String issuerId,
-                                                         @PathVariable("credentialType") String credentialType) {
+            @PathVariable("issuer-id") String issuerId,
+            @PathVariable("credentialType") String credentialType) {
 
         ResponseWrapper<Object> responseWrapper = new ResponseWrapper<>();
         responseWrapper.setId(ID);
         responseWrapper.setVersion("v1");
         responseWrapper.setResponsetime(DateUtils.getRequestTimeString());
 
-        try{
+        try {
             IssuerDTO issuerConfig = issuersService.getIssuerConfig(issuerId);
-            CredentialIssuerWellKnownResponse credentialIssuerWellKnownResponse = restApiClient.getApi(issuerConfig.getWellKnownEndpoint(), CredentialIssuerWellKnownResponse.class);
+            CredentialIssuerWellKnownResponse credentialIssuerWellKnownResponse = restApiClient
+                    .getApi(issuerConfig.getWellKnownEndpoint(), CredentialIssuerWellKnownResponse.class);
             if (credentialIssuerWellKnownResponse == null) {
                 throw new ApiNotAccessibleException();
             }
-            Optional<CredentialsSupportedResponse> credentialsSupportedResponse = credentialIssuerWellKnownResponse.getCredentialsSupported().stream()
+            System.out.println("=====credentialIssuerWellKnownResponse===");
+            System.out.println(credentialIssuerWellKnownResponse);
+            System.out.println("======ooooo=====");
+            Optional<CredentialsSupportedResponse> credentialsSupportedResponse = credentialIssuerWellKnownResponse
+                    .getCredentialsSupported().stream()
                     .filter(credentialsSupported -> credentialsSupported.getId().equals(credentialType))
                     .findFirst();
-            if (credentialsSupportedResponse.isEmpty()){
+            if (credentialsSupportedResponse.isEmpty()) {
                 logger.error("Invalid credential Type passed - {}", credentialType);
-                responseWrapper.setErrors(List.of(new ErrorDTO(INVALID_CREDENTIAL_TYPE_EXCEPTION.getCode(), INVALID_CREDENTIAL_TYPE_EXCEPTION.getMessage())));
+                responseWrapper.setErrors(List.of(new ErrorDTO(INVALID_CREDENTIAL_TYPE_EXCEPTION.getCode(),
+                        INVALID_CREDENTIAL_TYPE_EXCEPTION.getMessage())));
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseWrapper);
             }
-            ByteArrayInputStream inputStream =  issuersService.generatePdfForVerifiableCredentials(token, issuerConfig, credentialsSupportedResponse.get(), credentialIssuerWellKnownResponse.getCredentialEndPoint());
-            //PDF file name with issuer display name and credential type display name
-            String pdfFileName = issuerConfig.getDisplay().stream().filter(displayDTO -> defaultLanguageConstant.equals(displayDTO.getLanguage())).map(DisplayDTO::getName).findFirst().orElse(null) +
+            System.out.println("=====credentialsSupportedResponse===");
+            System.out.println(credentialsSupportedResponse.get());
+            System.out.println("======oooiiiooissuerConfig=====");
+            System.out.println(token + "===" + issuerConfig + "===" + credentialsSupportedResponse.get() + "==="
+                    + credentialIssuerWellKnownResponse.getCredentialEndPoint());
+            ByteArrayInputStream inputStream = issuersService.generatePdfForVerifiableCredentials(token, issuerConfig,
+                    credentialsSupportedResponse.get(), credentialIssuerWellKnownResponse.getCredentialEndPoint());
+            // PDF file name with issuer display name and credential type display name
+            String pdfFileName = issuerConfig.getDisplay().stream()
+                    .filter(displayDTO -> defaultLanguageConstant.equals(displayDTO.getLanguage()))
+                    .map(DisplayDTO::getName).findFirst().orElse(null) +
                     "_" + credentialsSupportedResponse.get().getDisplay().stream()
-                    .filter(credentialSupportedDisplayResponse -> defaultLanguageConstant.equals(credentialSupportedDisplayResponse.getLocale())).map(CredentialSupportedDisplayResponse::getName).findFirst().orElse(null);
+                            .filter(credentialSupportedDisplayResponse -> defaultLanguageConstant
+                                    .equals(credentialSupportedDisplayResponse.getLocale()))
+                            .map(CredentialSupportedDisplayResponse::getName).findFirst().orElse(null);
             return ResponseEntity
                     .ok()
                     .contentType(MediaType.APPLICATION_PDF)
                     .header(HttpHeaders.CONTENT_DISPOSITION, String.format("attachment; filename=%s.pdf", pdfFileName))
                     .header(HttpHeaders.ACCESS_CONTROL_EXPOSE_HEADERS, "Content-Disposition")
                     .body(new InputStreamResource(inputStream));
-        }catch (ApiNotAccessibleException | IOException exception){
+        } catch (ApiNotAccessibleException | IOException exception) {
             logger.error("Exception occurred while fetching credential types ", exception);
-            responseWrapper.setErrors(List.of(new ErrorDTO(API_NOT_ACCESSIBLE_EXCEPTION.getCode(), API_NOT_ACCESSIBLE_EXCEPTION.getMessage())));
+            responseWrapper.setErrors(List.of(
+                    new ErrorDTO(API_NOT_ACCESSIBLE_EXCEPTION.getCode(), API_NOT_ACCESSIBLE_EXCEPTION.getMessage())));
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(responseWrapper);
         } catch (Exception exception) {
             logger.error("Exception occurred while generating pdf ", exception);
-            responseWrapper.setErrors(List.of(new ErrorDTO(MIMOTO_PDF_SIGN_EXCEPTION.getCode(), MIMOTO_PDF_SIGN_EXCEPTION.getMessage())));
+            responseWrapper.setErrors(
+                    List.of(new ErrorDTO(MIMOTO_PDF_SIGN_EXCEPTION.getCode(), MIMOTO_PDF_SIGN_EXCEPTION.getMessage())));
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(responseWrapper);
         }
     }

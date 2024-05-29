@@ -16,9 +16,9 @@
       ],
       "protocol": "OpenId4VCI",
       "client_id": "DPG",
-      "client_alias": "esignet-sunbird-partner",
+      "client_alias": "DPG",
       "scopes_supported": [
-        "openid profile"
+        "sunbird_rc_insurance_vc_ldp"
       ],
       "additional_headers": {
         "Accept": "application/json"
@@ -34,7 +34,7 @@
         "VerifiableCredential",
         "InsuranceCredential"
       ],
-      "credential_audience": "http://20.193.138.163",
+      "credential_audience": "Sunbird",
       "enabled": "true"
     }
   ]

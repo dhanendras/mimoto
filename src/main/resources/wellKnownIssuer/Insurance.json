@@ -1,6 +1,6 @@
 {
-  "credential_issuer": "MosipInsurance",
-  "credential_endpoint": "http://localhost:8088/v1/esignet/vci/credential",
+  "credential_issuer": "Sunbird",
+  "credential_endpoint": "http://20.193.138.163/v1/esignet/vci/credential",
   "credentials_supported": [
     {
       "format": "ldp_vc",
