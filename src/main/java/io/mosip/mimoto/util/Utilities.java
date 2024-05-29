@@ -25,13 +25,17 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 
+import java.io.BufferedReader;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import static io.mosip.mimoto.constant.LoggerFileConstant.DELIMITER;
 import static io.mosip.mimoto.controller.IdpController.getErrorResponse;
@@ -121,22 +125,34 @@ public class Utilities {
     private String credentialsSupportedJsonString = null;
 
     private String credentialTemplateHtmlString = null;
-//    uncomment for running mimoto Locally to populate the issuers json
-    public Utilities(@Value("classpath:/wellKnownIssuer/Insurance.json") Resource credentialsSupportedResource,
-                     @Value("classpath:mimoto-issuers-config.json") Resource resource,
-                     @Value("classpath:/templates/CredentialTemplate.html") Resource credentialTemplateResource) throws IOException{
 
-        issuersConfigJsonString = (Files.readString(resource.getFile().toPath()));
-        credentialsSupportedJsonString = (Files.readString(credentialsSupportedResource.getFile().toPath()));
-        credentialTemplateHtmlString = (Files.readString(credentialTemplateResource.getFile().toPath()));
-    }
+    // uncomment for running mimoto Locally to populate the issuers json
+    /*
+     * public Utilities(@Value("classpath:/wellKnownIssuer/Insurance.json") Resource
+     * credentialsSupportedResource,
+     * 
+     * @Value("classpath:mimoto-issuers-config.json") Resource resource,
+     * 
+     * @Value("classpath:/templates/CredentialTemplate.html") Resource
+     * credentialTemplateResource)
+     * throws IOException {
+     * 
+     * issuersConfigJsonString = (Files.readString(resource.getFile().toPath()));
+     * credentialsSupportedJsonString =
+     * (Files.readString(credentialsSupportedResource.getFile().toPath()));
+     * credentialTemplateHtmlString =
+     * (Files.readString(credentialTemplateResource.getFile().toPath()));
+     * }
+     */
 
     public JSONObject getTemplate() throws JsonParseException, JsonMappingException, IOException {
         return objectMapper.readValue(classLoader.getResourceAsStream(defaultTemplate), JSONObject.class);
     }
 
-    public JsonNode getEvent(String requestId, String individualId) throws JsonParseException, JsonMappingException, IOException {
-        Path resourcePath = Path.of(dataPath, String.format(CredentialShareServiceImpl.EVENT_JSON_FILE_NAME, requestId));
+    public JsonNode getEvent(String requestId, String individualId)
+            throws JsonParseException, JsonMappingException, IOException {
+        Path resourcePath = Path.of(dataPath,
+                String.format(CredentialShareServiceImpl.EVENT_JSON_FILE_NAME, requestId));
         if (Files.exists(resourcePath)) {
             return objectMapper.readValue(resourcePath.toFile(), JsonNode.class);
         }
@@ -152,7 +168,8 @@ public class Utilities {
     }
 
     public JsonNode getRequestVC(String requestId) throws JsonParseException, JsonMappingException, IOException {
-        Path resourcePath = Path.of(dataPath, String.format(CredentialShareServiceImpl.VC_REQUEST_FILE_NAME, requestId));
+        Path resourcePath = Path.of(dataPath,
+                String.format(CredentialShareServiceImpl.VC_REQUEST_FILE_NAME, requestId));
         if (Files.exists(resourcePath)) {
             return objectMapper.readValue(resourcePath.toFile(), JsonNode.class);
         }
@@ -194,22 +211,47 @@ public class Utilities {
     public String getJson(String configServerFileStorageURL, String uri) {
         String json = null;
         try {
-            json = restApiClient.getApi(URI.create(configServerFileStorageURL + uri), String.class);
+            System.out.println("=====uri-heelo=====" + uri);
+            if (uri == "mimoto-issuers-config.json") {
+                System.out.println("=====uri-2=====" + uri);
+
+                json = getResourceFileAsString("mimoto-issuers-config.json");
+                System.out.println("=====uri-json=====" + json);
+
+            } else
+                json = restApiClient.getApi(URI.create(configServerFileStorageURL + uri), String.class);
         } catch (Exception e) {
             logger.error(ExceptionUtils.getStackTrace(e));
         }
         return json;
     }
 
+    public static String getResourceFileAsString(String fileName) {
+        InputStream is = getResourceFileAsInputStream(fileName);
+        if (is != null) {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(is));
+            return (String) reader.lines().collect(Collectors.joining(System.lineSeparator()));
+        } else {
+            throw new RuntimeException("resource not found");
+        }
+    }
+
+    public static InputStream getResourceFileAsInputStream(String fileName) {
+        ClassLoader classLoader = Utilities.class.getClassLoader();
+        return classLoader.getResourceAsStream(fileName);
+    }
+
     public String getPrintTextFileJson(String configServerFileStorageURL, String uri) {
-        printTextFileJsonString = (printTextFileJsonString != null && !printTextFileJsonString.isEmpty()) ?
-                printTextFileJsonString : getJson(configServerFileStorageURL, uri);
+        printTextFileJsonString = (printTextFileJsonString != null && !printTextFileJsonString.isEmpty())
+                ? printTextFileJsonString
+                : getJson(configServerFileStorageURL, uri);
         return printTextFileJsonString;
     }
 
     public String getIdentityMappingJson(String configServerFileStorageURL, String uri) {
-        identityMappingJsonString = (identityMappingJsonString != null && !identityMappingJsonString.isEmpty()) ?
-                identityMappingJsonString : getJson(configServerFileStorageURL, uri);
+        identityMappingJsonString = (identityMappingJsonString != null && !identityMappingJsonString.isEmpty())
+                ? identityMappingJsonString
+                : getJson(configServerFileStorageURL, uri);
         return identityMappingJsonString;
     }
 
@@ -234,7 +276,8 @@ public class Utilities {
             pathSegments.add(uin);
             ResponseWrapper<IdResponseDTO> idResponseDto;
 
-            idResponseDto = (ResponseWrapper<IdResponseDTO>) restClientService.getApi(ApiName.IDREPOGETIDBYUIN, pathSegments, "", "",
+            idResponseDto = (ResponseWrapper<IdResponseDTO>) restClientService.getApi(ApiName.IDREPOGETIDBYUIN,
+                    pathSegments, "", "",
                     ResponseWrapper.class);
             if (idResponseDto == null) {
                 logger.debug(LoggerFileConstant.SESSIONID.toString(), LoggerFileConstant.UIN.toString(), "",
@@ -275,12 +318,13 @@ public class Utilities {
         logger.debug(LoggerFileConstant.SESSIONID.toString(), LoggerFileConstant.USERID.toString(), "",
                 "Utilities::getRegistrationProcessorMappingJson()::entry");
 
-        mappingJsonString = (mappingJsonString != null && !mappingJsonString.isEmpty()) ?
-                mappingJsonString : getJson(configServerFileStorageURL, getRegProcessorIdentityJson);
+        mappingJsonString = (mappingJsonString != null && !mappingJsonString.isEmpty()) ? mappingJsonString
+                : getJson(configServerFileStorageURL, getRegProcessorIdentityJson);
         ObjectMapper mapIdentityJsonStringToObject = new ObjectMapper();
         logger.debug(LoggerFileConstant.SESSIONID.toString(), LoggerFileConstant.USERID.toString(), "",
                 "Utilities::getRegistrationProcessorMappingJson()::exit");
-        return JsonUtil.getJSONObject(mapIdentityJsonStringToObject.readValue(mappingJsonString, JSONObject.class), MappingJsonConstants.IDENTITY);
+        return JsonUtil.getJSONObject(mapIdentityJsonStringToObject.readValue(mappingJsonString, JSONObject.class),
+                MappingJsonConstants.IDENTITY);
 
     }
 
@@ -295,15 +339,21 @@ public class Utilities {
     }
 
     public String getIssuersConfigJsonValue() throws IOException {
-        return  (issuersConfigJsonString != null && !issuersConfigJsonString.isEmpty()) ?
-                issuersConfigJsonString : getJson(configServerFileStorageURL, getIssuersConfigJson);
+        System.out.println("=====getIssuersConfigJsonValueuri-2=====");
+
+        String json = getResourceFileAsString(getIssuersConfigJson);
+        System.out.println("=====uri-getIssuersConfigJsonValue=====" + json);
+        return json;
+        // return (issuersConfigJsonString != null &&
+        // !issuersConfigJsonString.isEmpty()) ? issuersConfigJsonString
+        // : getJson(configServerFileStorageURL, getIssuersConfigJson);
     }
 
     public static ResponseWrapper<Object> handleExceptionWithErrorCode(Exception exception) {
         String errorMessage = exception.getMessage();
         String errorCode = PlatformErrorMessages.MIMOTO_IDP_GENERIC_EXCEPTION.getCode();
 
-        if(errorMessage.contains(DELIMITER)){
+        if (errorMessage.contains(DELIMITER)) {
             String[] errorSections = errorMessage.split(DELIMITER);
             errorCode = errorSections[0];
             errorMessage = errorSections[1];
@@ -311,16 +361,30 @@ public class Utilities {
         return getErrorResponse(errorCode, errorMessage);
     }
 
-    public String getCredentialsSupportedConfigJsonValue() throws IOException{
-        return (credentialsSupportedJsonString != null && !credentialsSupportedJsonString.isEmpty()) ?
-                credentialsSupportedJsonString : getJson(configServerFileStorageURL, getIssuerCredentialSupportedJson);
+    public String getCredentialsSupportedConfigJsonValue() throws IOException {
+        /*
+         * return (credentialsSupportedJsonString != null &&
+         * !credentialsSupportedJsonString.isEmpty())
+         * ? credentialsSupportedJsonString
+         * : getJson(configServerFileStorageURL, getIssuerCredentialSupportedJson);
+         */
+
+        String json = getResourceFileAsString(getIssuerCredentialSupportedJson);
+        System.out.println("=====uri-getIssuersConfigJsonValue=====" + json);
+        return json;
     }
 
-    public String getCredentialSupportedTemplateString() throws IOException{
-        return (credentialTemplateHtmlString != null && !credentialTemplateHtmlString.isEmpty()) ?
-                credentialTemplateHtmlString : getJson(configServerFileStorageURL, getCredentialSupportedHtml);
+    public String getCredentialSupportedTemplateString() throws IOException {
+        /*
+         * return (credentialTemplateHtmlString != null &&
+         * !credentialTemplateHtmlString.isEmpty())
+         * ? credentialTemplateHtmlString
+         * : getJson(configServerFileStorageURL, getCredentialSupportedHtml);
+         */
+        String json = getResourceFileAsString("templates/" + getCredentialSupportedHtml);
+        System.out.println("=====uri-getIssuersConfigJsonValue=====" + json);
+        return json;
     }
-
 
     /**
      * retrieve UIN from IDRepo by registration id.
@@ -344,7 +408,8 @@ public class Utilities {
             logger.debug(LoggerFileConstant.SESSIONID.toString(), LoggerFileConstant.REGISTRATIONID.toString(),
                     regId, "Utilities::retrieveUIN():: RETRIEVEIDENTITYFROMRID GET service call Started");
 
-            idResponseDto = (ResponseWrapper<IdResponseDTO>) restClientService.getApi(ApiName.RETRIEVEIDENTITYFROMRID, pathSegments, "",
+            idResponseDto = (ResponseWrapper<IdResponseDTO>) restClientService.getApi(ApiName.RETRIEVEIDENTITYFROMRID,
+                    pathSegments, "",
                     "", ResponseWrapper.class);
             logger.debug(LoggerFileConstant.SESSIONID.toString(), LoggerFileConstant.UIN.toString(), "",
                     "Utilities::retrieveUIN():: RETRIEVEIDENTITYFROMRID GET service call ended successfully");
@@ -356,7 +421,8 @@ public class Utilities {
                                 + PlatformErrorMessages.MIMOTO_PVM_INVALID_UIN.getMessage() + " "
                                 + idResponseDto.getErrors().toString());
                 throw new IdRepoAppException(
-                        PlatformErrorMessages.MIMOTO_PVM_INVALID_UIN.getMessage() + idResponseDto.getErrors().toString());
+                        PlatformErrorMessages.MIMOTO_PVM_INVALID_UIN.getMessage()
+                                + idResponseDto.getErrors().toString());
             }
             String response = objMapper.writeValueAsString(idResponseDto.getResponse().getIdentity());
             try {
