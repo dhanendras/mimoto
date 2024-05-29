@@ -71,14 +71,14 @@ public class CryptoCoreUtil {
     private String alias;
 
     public String decrypt(String data) throws Exception {
-        String decryptedData=null;
+        String decryptedData = null;
         try {
             PrivateKeyEntry privateKeyEntry = loadP12();
             byte[] dataBytes = org.apache.commons.codec.binary.Base64.decodeBase64(data);
             byte[] data1 = decryptData(dataBytes, privateKeyEntry);
             decryptedData = new String(data1);
-        }catch (Exception e){
-            logger.error( "Not able to decrypt the data", e);
+        } catch (Exception e) {
+            logger.error("Not able to decrypt the data", e);
         }
         return decryptedData;
     }
@@ -94,11 +94,13 @@ public class CryptoCoreUtil {
                 // Try to get external partner keystore
                 keystoreResourceStream = Files.newInputStream(Paths.get(fileName));
             }
+            System.out.println("======cyptoPassword.toCharArray()=====" + cyptoPassword);
             mosipKeyStore.load(keystoreResourceStream, cyptoPassword.toCharArray());
             ProtectionParameter password = new PasswordProtection(cyptoPassword.toCharArray());
             privateKeyEntry = (PrivateKeyEntry) mosipKeyStore.getEntry(alias, password);
-        } catch (UnrecoverableEntryException | CertificateException | KeyStoreException | IOException|NoSuchAlgorithmException e) {
-            logger.error( "Not able to decrypt the data", e);
+        } catch (UnrecoverableEntryException | CertificateException | KeyStoreException | IOException
+                | NoSuchAlgorithmException e) {
+            logger.error("Not able to decrypt the data", e);
         } finally {
             if (keystoreResourceStream != null) {
                 keystoreResourceStream.close();
@@ -106,6 +108,7 @@ public class CryptoCoreUtil {
         }
         return privateKeyEntry;
     }
+
     public PrivateKeyEntry loadP12() throws IOException {
         return loadP12(fileName, alias, cyptoPassword);
     }
@@ -147,7 +150,7 @@ public class CryptoCoreUtil {
                 return symmetricDecrypt(symmetricKey, encryptedData, null);
             }
         } catch (Exception e) {
-            logger.error( "Not able to decrypt the data {}", e);
+            logger.error("Not able to decrypt the data {}", e);
         }
         return null;
     }
