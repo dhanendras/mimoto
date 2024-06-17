@@ -6,7 +6,7 @@
         {
           "name": "Issuer Provider Name",
           "logo": {
-            "url": "https://sunbird.org/images/sunbird-logo-new.png",
+            "url": "https://img.freepik.com/premium-vector/campus-collage-university-education-logo-design-template_7492-66.jpg?w=1800",
             "alt_text": "an issuer logo"
           },
           "language": "en",
@@ -18,21 +18,21 @@
       "client_id": "DPG",
       "client_alias": "DPG",
       "scopes_supported": [
-        "sunbird_rc_insurance_vc_ldp"
+        "sunbird_rc_education_vc_ldp"
       ],
       "additional_headers": {
         "Accept": "application/json"
       },
-      ".well-known": "http://20.193.138.163/v1/esignet/vci/.well-known/openid-credential-issuer?version=v11",
-      "redirect_uri": "io.mosip.residentapp://oauth",
-      "authorization_endpoint": "http://20.193.138.163/ui/authorize",
-      "authorization_audience": "http://20.193.138.163/v1/esignet/oauth/v2/token",
-      "token_endpoint": "http://20.193.138.163/residentmobileapp/get-token/Sunbird",
-      "proxy_token_endpoint": "http://20.193.138.163/v1/esignet/oauth/v2/token",
-      "credential_endpoint": "http://20.193.138.163/v1/esignet/vci/credential",
+      ".well-known": "https://idt.one1sewa.com/v1/esignet/vci/.well-known/openid-credential-issuer?version=v11",
+      "redirect_uri": "io.mosip.residentapp.inji://oauth",
+      "authorization_endpoint": "https://idt.one1sewa.com/ui/authorize",
+      "authorization_audience": "https://idt.one1sewa.com/v1/esignet/oauth/v2/token",
+      "token_endpoint": "https://idt.one1sewa.com/residentmobileapp/get-token/Sunbird",
+      "proxy_token_endpoint": "https://idt.one1sewa.com/v1/esignet/oauth/v2/token",
+      "credential_endpoint": "https://idt.one1sewa.com/v1/esignet/vci/credential",
       "credential_type": [
         "VerifiableCredential",
-        "InsuranceCredential"
+        "EducationCredential"
       ],
       "credential_audience": "Sunbird",
       "enabled": "true"
